@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+      <PackageReference Include="FluentValidation" Version="12.1.1" />
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+      <PackageReference Include="Mapster" Version="10.0.0-pre01" />
+      <PackageReference Include="MediatR" Version="14.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\LottyAB.Contracts\LottyAB.Contracts.csproj" />
+      <ProjectReference Include="..\LottyAB.Domain\LottyAB.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

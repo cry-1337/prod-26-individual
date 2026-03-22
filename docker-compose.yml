@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lottyab-postgres
+    environment:
+      POSTGRES_USER: lottyab
+      POSTGRES_PASSWORD: lottyab_password
+      POSTGRES_DB: lottyab
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lottyab"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: lottyab-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lottyab-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 80
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=lottyab;Username=lottyab;Password=lottyab_password"
+      ConnectionStrings__Redis: "redis:6379"
+      Jwt:SecretKey: "fzJ7v>2-R%2}KgaHd^gX8=B3fukrsF~Y"
+      Jwt:AccessTokenExpiryMinutes: "30"
+      Notifications__Telegram__BotToken: "no"
+      Notifications__Telegram__ChatIds: "no"
+      Notifications__Slack__BotToken: "no"
+      Notifications__Slack__ChannelIds: "no"
+    ports:
+      - "80:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:

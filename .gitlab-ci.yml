@@ -1,0 +1,48 @@
+stages:
+  - build
+  - test
+
+variables:
+  SOLUTION_FILE: "src/LottyAB/LottyAB.sln"
+
+.dotnet-base:
+  image: mcr.microsoft.com/dotnet/sdk:10.0
+  before_script:
+    - dotnet --version
+
+build:
+  extends: .dotnet-base
+  stage: build
+  script:
+    - dotnet restore $SOLUTION_FILE
+    - dotnet build $SOLUTION_FILE --configuration Release --no-restore
+  artifacts:
+    paths:
+      - src/LottyAB/*/bin/Release/
+      - src/LottyAB/*/obj/
+    expire_in: 1 hour
+  only:
+    - main
+
+test:
+  extends: .dotnet-base
+  stage: test
+  dependencies:
+    - build
+  script:
+    - dotnet add src/LottyAB/LottyAB.Tests/LottyAB.Tests.csproj package JunitXml.TestLogger
+    - dotnet build $SOLUTION_FILE --configuration Release
+    - dotnet test $SOLUTION_FILE --configuration Release --no-build --verbosity normal --logger "junit;LogFileName=test-results.xml" --results-directory ./TestResults
+    - find . -name "*.xml" -type f
+    - ls -la TestResults/ || echo "TestResults directory not found"
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - TestResults/*.xml
+        - TestResults/**/*.xml
+    paths:
+      - TestResults/
+    expire_in: 7 days
+  only:
+    - main
